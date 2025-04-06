@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageMaster Pro - All-in-One Image Processing Tool</title>
+    <meta name="description" content="Compress, convert, upscale & export images with our free all-in-one image processing tool. Convert between multiple image formats and create PDFs instantly.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .drag-area {
+            border: 2px dashed #4299e1;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .drag-area.active {
+            border-color: #3182ce;
+            background-color: rgba(66, 153, 225, 0.1);
+        }
+        .tool-section {
+            display: none;
+        }
+        .tool-section.active {
+            display: block;
+        }
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        .dark .bg-white {
+            background-color: #2d3748;
+        }
+        .dark .bg-gray-100 {
+            background-color: #4a5568;
+        }
+        .dark .text-gray-800 {
+            color: #e2e8f0;
+        }
+        .dark .text-gray-700 {
+            color: #cbd5e0;
+        }
+        .dark .text-gray-600 {
+            color: #a0aec0;
+        }
+        .dark .border-gray-200 {
+            border-color: #4a5568;
+        }
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+        .dark .drag-area {
+            border-color: #63b3ed;
+        }
+        .dark .hover\:bg-gray-100:hover {
+            background-color: #4a5568;
+        }
+        .dark .bg-gray-300 {
+            background-color: #4a5568;
+        }
+        .adsense-container {
+            min-height: 90px;
+            background-color: rgba(241, 245, 249, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+        .dark .adsense-container {
+            background-color: rgba(30, 41, 59, 0.5);
+            color: #94a3b8;
+        }
+        .preview-container {
+            min-height: 200px;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dark .preview-container {
+            border-color: #4b5563;
+        }
+        .slider-container {
+            width: 100%;
+        }
+        .slider-container input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            outline: none;
+        }
+        .dark .slider-container input[type="range"] {
+            background: #4b5563;
+        }
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border: none;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+        .format-info-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .format-info-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 240px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -120px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.75rem;
+            line-height: 1.25rem;
+        }
+        .format-info-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .format-info-tooltip .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        .tooltip-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+        .dark .comparison-table th,
+        .dark .comparison-table td {
+            border-color: #4a5568;
+        }
+        .comparison-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+        .dark .comparison-table th {
+            background-color: #2d3748;
+        }
+        .comparison-table tr:nth-child(even) {
+            background-color: #f1f5f9;
+        }
+        .dark .comparison-table tr:nth-child(even) {
+            background-color: #374151;
+        }
+        .active-tab {
+            background-color: #ebf5ff;
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .dark .active-tab {
+            background-color: #2c5282;
+            color: #ebf5ff;
+        }
+        .file-item {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .dark .file-item {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .file-handle {
+            cursor: move;
+            margin-right: 0.5rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-green {
+            background-color: #c6f6d5;
+            color: #22543d;
+        }
+        .badge-yellow {
+            background-color: #fefcbf;
+            color: #744210;
+        }
+        .badge-red {
+            background-color: #fed7d7;
+            color: #742a2a;
+        }
+        .dark .badge-green {
+            background-color: #22543d;
+            color: #c6f6d5;
+        }
+        .dark .badge-yellow {
+            background-color: #744210;
+            color: #fefcbf;
+        }
+        .dark .badge-red {
+            background-color: #742a2a;
+            color: #fed7d7;
+        }
+        @media print {
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md transition-colors duration-300 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <svg class="h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <span class="ml-3 text-xl font-bold text-blue-600">ImageMaster Pro</span>
+                </div>
+                
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-blue-500 transition-colors">Features</a>
+                    <a href="#tools" class="text-gray-600 hover:text-blue-500 transition-colors">Tools</a>
+                    <a href="#testimonials" class="text-gray-600 hover:text-blue-500 transition-colors">Testimonials</a>
+                    <a href="#contact" class="text-gray-600 hover:text-blue-500 transition-colors">Contact</a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <svg id="moon-icon" class="h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <svg id="sun-icon" class="h-5 w-5 text-yellow-500 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    
+                    <div class="md:hidden">
+                        <button id="mobile-menu-button" class="p-2 rounded-md hover:bg-gray-100 transition-colors">
+                            <svg class="h-6 w-6 text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile menu, hidden by default -->
+            <div id="mobile-menu" class="md:hidden hidden pt-4 pb-2">
+                <a href="#features" class="block py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-md">Features</a>
+                <a href="#tools" class="block py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-md">Tools</a>
+                <a href="#testimonials" class="block py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-md">Testimonials</a>
+                <a href="#contact" class="block py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-md">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="py-16 md:py-24 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 md:pr-12 mb-10 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                        Compress, Convert, Upscale & Export Images —
+                        <span class="text-blue-600">All in One Place!</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-8">
+                        Our powerful suite of image processing tools puts professional-grade image manipulation at your fingertips. No software installation required.
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#tools" class="btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition shadow-md hover:shadow-lg text-center">
+                            Try Tool Now
+                        </a>
+                        <a href="#features" class="btn bg-white hover:bg-gray-100 text-blue-600 font-bold py-3 px-8 rounded-lg transition border border-blue-600 text-center">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <div class="bg-white shadow-xl rounded-xl p-4 transition-colors duration-300">
+                        <img src="https://cdn.jsdelivr.net/gh/tailwindlabs/tailwindcss/example.png" alt="Image Processing Demo" class="rounded-lg w-full">
+                        <div class="mt-4 bg-blue-50 p-3 rounded-lg text-blue-800 text-sm">
+                            <div class="flex items-start">
+                                <svg class="h-5 w-5 mr-2 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                <div>
+                                    <p class="font-semibold">Free to use, no account required</p>
+                                    <p class="text-blue-700 mt-1">Process your images securely without uploading to a server</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AdSense Container -->
+    <div class="adsense-container mx-auto container">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8917075150623976" crossorigin="anonymous"></script>
+    <!-- ImageMaster Pro Banner Ad -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8917075150623976"
+         data-ad-slot="2012326330"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 bg-gray-100 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Powerful Image Tools at Your Fingertips</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Our comprehensive suite of image processing tools helps you optimize, 
+                    convert, and enhance your images in seconds.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 transition-colors duration-300">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                        <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <polyline points="23 20 23 14 17 14"></polyline>
+                            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Image Compression</h3>
+                    <p class="text-gray-600 mb-4">
+                        Reduce file size without sacrificing quality. Perfect for web images, 
+                        email attachments, and storage optimization.
+                    </p>
+                    <a href="#compress-tool" class="tool-link text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+                        Try Compression Tool
+                        <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 transition-colors duration-300">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                        <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                            <line x1="4" y1="22" x2="4" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Format Conversion</h3>
+                    <p class="text-gray-600 mb-4">
+                        Convert between 15+ image formats including JPG, PNG, WEBP, AVIF, SVG, and more
+                        to meet any platform requirement.
+                    </p>
+                    <a href="#convert-tool" class="tool-link text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+                        Try Conversion Tool
+                        <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 transition-colors duration-300">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                        <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                            <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                            <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                            <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                            <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">AI Image Upscaler</h3>
+                    <p class="text-gray-600 mb-4">
+                        Enhance image resolution using advanced AI algorithms. 
+                        Turn low-resolution images into sharp, detailed versions.
+                    </p>
+                    <a href="#upscale-tool" class="tool-link text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+                        Try Upscaling Tool
+                        <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+                
+                <!-- Feature 4 -->
+                <div class="feature-card bg-white rounded-xl shadow-lg p-6 transition-colors duration-300">
+                    <div class="bg-blue-100 rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                        <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Image to PDF</h3>
+                    <p class="text-gray-600 mb-4">
+                        Convert single or multiple images into professional PDF documents.
+                        Perfect for creating portfolios or documentation.
+                    </p>
+                    <a href="#pdf-tool" class="tool-link text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+                        Try PDF Converter
+                        <svg class="h-4 w-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tool Section -->
+    <section id="tools" class="py-16 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Our Image Processing Tools</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Select a tool below to get started. All processing happens in your browser - 
+                    your images stay private and are never uploaded to our servers.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-colors duration-300">
+                <!-- Tool Navigation -->
+                <div class="flex flex-wrap border-b border-gray-200">
+                    <button class="tool-btn px-6 py-4 font-medium hover:bg-gray-100 transition focus:outline-none active-tab" data-target="compress-tool">
+                        Image Compression
+                    </button>
+                    <button class="tool-btn px-6 py-4 font-medium hover:bg-gray-100 transition focus:outline-none" data-target="convert-tool">
+                        Format Converter
+                    </button>
+                    <button class="tool-btn px-6 py-4 font-medium hover:bg-gray-100 transition focus:outline-none" data-target="upscale-tool">
+                        AI Upscaler
+                    </button>
+                    <button class="tool-btn px-6 py-4 font-medium hover:bg-gray-100 transition focus:outline-none" data-target="pdf-tool">
+                        Image to PDF
+                    </button>
+                </div>
+                
+                <!-- Tool Content -->
+                <div class="p-6">
+                    <!-- Compression Tool -->
+                    <div id="compress-tool" class="tool-section active">
+                        <h3 class="text-2xl font-bold mb-4">Image Compression Tool</h3>
+                        <p class="text-gray-600 mb-6">
+                            Reduce your image file size while maintaining visual quality. Perfect for websites,
+                            social media, and email attachments.
+                        </p>
+                        
+                        <div class="drag-area p-8 mb-6 text-center cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">Drag & Drop your image here</h4>
+                            <p class="text-gray-500 mb-4">or</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                Browse Files
+                            </button>
+                            <input type="file" class="hidden" accept="image/*">
+                            <p class="text-gray-500 text-sm mt-4">
+                                Supported formats: JPG, PNG, WEBP, GIF (Max size: 10MB)
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">Compression Level</label>
+                            <div class="slider-container">
+                                <input type="range" min="1" max="100" value="80" class="mb-2">
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>High Quality</span>
+                                    <span>Medium</span>
+                                    <span>Small Size</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h4 class="font-medium mb-2">Original Image</h4>
+                                <div class="preview-container">
+                                    <p class="text-gray-500 text-center">Original image preview</p>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    Size: <span id="original-size">0 KB</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium mb-2">Compressed Result</h4>
+                                <div class="preview-container">
+                                    <p class="text-gray-500 text-center">Compressed image preview</p>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    Size: <span id="compressed-size">0 KB</span> 
+                                    (Saved: <span id="saved-percentage">0%</span>)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg mr-4 cursor-not-allowed">
+                                Compress Image
+                            </button>
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg cursor-not-allowed">
+                                Download Result
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Format Converter Tool -->
+                    <div id="convert-tool" class="tool-section">
+                        <h3 class="text-2xl font-bold mb-4">Image Format Converter</h3>
+                        <p class="text-gray-600 mb-6">
+                            Convert your images between different formats to optimize for size, quality, or compatibility.
+                            Support for over 15 file formats to meet any requirement.
+                        </p>
+                        
+                        <div class="drag-area p-8 mb-6 text-center cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">Drag & Drop your image here</h4>
+                            <p class="text-gray-500 mb-4">or</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                Browse Files
+                            </button>
+                            <input type="file" class="hidden" accept="image/*">
+                            <p class="text-gray-500 text-sm mt-4">
+                                Supports conversion from any common image format
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">Target Format</label>
+                            <select class="w-full md:w-80 p-3 border border-gray-300 rounded-lg">
+                                <!-- Common Web Formats -->
+                                <optgroup label="Common Web Formats">
+                                    <option value="jpg">JPG - Best for photos</option>
+                                    <option value="png">PNG - Best for transparency</option>
+                                    <option value="webp">WebP - Modern web format</option>
+                                    <option value="gif">GIF - Supports animation</option>
+                                    <option value="avif">AVIF - Next-gen web format</option>
+                                    <option value="svg">SVG - Vector graphics</option>
+                                </optgroup>
+                                
+                                <!-- Advanced Formats -->
+                                <optgroup label="Advanced Formats">
+                                    <option value="jp2">JPEG 2000 - High quality compression</option>
+                                    <option value="tiff">TIFF - Professional publishing</option>
+                                    <option value="bmp">BMP - Uncompressed bitmap</option>
+                                    <option value="heic">HEIC - High efficiency (iOS photos)</option>
+                                    <option value="webp-lossless">WebP Lossless - Detail preservation</option>
+                                </optgroup>
+                                
+                                <!-- Professional Formats -->
+                                <optgroup label="Professional Formats">
+                                    <option value="psd">PSD - Photoshop document</option>
+                                    <option value="eps">EPS - Print design</option>
+                                    <option value="raw">RAW - Camera raw formats</option>
+                                </optgroup>
+                                
+                                <!-- Specialized Formats -->
+                                <optgroup label="Specialized Formats">
+                                    <option value="ico">ICO - Favicon/Icon format</option>
+                                    <option value="apng">APNG - Animated PNG</option>
+                                    <option value="dicom">DICOM - Medical imaging</option>
+                                </optgroup>
+                            </select>
+                            <div class="format-info-tooltip inline-block ml-2">
+                                <svg class="h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12" y2="8"></line>
+                                </svg>
+                                <div class="tooltip-text">
+                                    <div class="tooltip-title">Format Guide</div>
+                                    <p>JPG: Photos, lossy compression<br>
+                                    PNG: Graphics with transparency<br>
+                                    WebP: Modern web images, smaller than JPG<br>
+                                    AVIF: Next-gen format with excellent compression<br>
+                                    SVG: Vector graphics, ideal for logos</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">Image Preview</label>
+                            <div class="preview-container">
+                                <p class="text-gray-500 text-center">Image preview will appear here</p>
+                            </div>
+                            <div class="mt-2 text-sm text-gray-600">
+                                Original Format: <span id="original-format">--</span> | 
+                                Size: <span id="format-original-size">0 KB</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-8">
+                            <label class="block font-medium mb-3">Format Comparison</label>
+                            <div class="bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                                <table class="comparison-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Format</th>
+                                            <th>Best For</th>
+                                            <th>Transparency</th>
+                                            <th>Animation</th>
+                                            <th>Compression</th>
+                                            <th>Web Support</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>JPG</td>
+                                            <td>Photos</td>
+                                            <td><span class="badge badge-red">No</span></td>
+                                            <td><span class="badge badge-red">No</span></td>
+                                            <td>Lossy</td>
+                                            <td><span class="badge badge-green">Excellent</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>PNG</td>
+                                            <td>Graphics</td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td><span class="badge badge-red">No</span></td>
+                                            <td>Lossless</td>
+                                            <td><span class="badge badge-green">Excellent</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>WebP</td>
+                                            <td>Web images</td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td>Both</td>
+                                            <td><span class="badge badge-yellow">Good</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>AVIF</td>
+                                            <td>Web optimization</td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td>Both</td>
+                                            <td><span class="badge badge-yellow">Growing</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>HEIC</td>
+                                            <td>Mobile photos</td>
+                                            <td><span class="badge badge-green">Yes</span></td>
+                                            <td><span class="badge badge-red">No</span></td>
+                                            <td>Lossy</td>
+                                            <td><span class="badge badge-red">Limited</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg mr-4 cursor-not-allowed">
+                                Convert Image
+                            </button>
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg cursor-not-allowed">
+                                Download Result
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Upscaler Tool -->
+                    <div id="upscale-tool" class="tool-section">
+                        <h3 class="text-2xl font-bold mb-4">AI Image Upscaler</h3>
+                        <p class="text-gray-600 mb-6">
+                            Enhance your image resolution using advanced AI algorithms. 
+                            Turn low-resolution images into sharp, detailed versions.
+                        </p>
+                        
+                        <div class="drag-area p-8 mb-6 text-center cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">Drag & Drop your image here</h4>
+                            <p class="text-gray-500 mb-4">or</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                Browse Files
+                            </button>
+                            <input type="file" class="hidden" accept="image/*">
+                            <p class="text-gray-500 text-sm mt-4">
+                                Recommended: Images under 1024×1024px for best results
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">Upscaling Level</label>
+                            <div class="flex flex-wrap space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="upscale-level" value="2x" class="form-radio" checked>
+                                    <span class="ml-2">2x (Good for most uses)</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="upscale-level" value="4x" class="form-radio">
+                                    <span class="ml-2">4x (Maximum enhancement)</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">AI Enhancement Model</label>
+                            <div class="flex flex-wrap space-x-4">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="ai-model" value="standard" class="form-radio" checked>
+                                    <span class="ml-2">Standard (Fast)</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="ai-model" value="hq" class="form-radio">
+                                    <span class="ml-2">High Quality (Slower)</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="ai-model" value="photo" class="form-radio">
+                                    <span class="ml-2">Photo Realistic</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <h4 class="font-medium mb-2">Original Image</h4>
+                                <div class="preview-container">
+                                    <p class="text-gray-500 text-center">Original image preview</p>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    Resolution: <span id="original-resolution">-- × --</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="font-medium mb-2">Enhanced Result</h4>
+                                <div class="preview-container">
+                                    <p class="text-gray-500 text-center">Enhanced image preview</p>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    Resolution: <span id="enhanced-resolution">-- × --</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg mr-4 cursor-not-allowed">
+                                Enhance Image
+                            </button>
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg cursor-not-allowed">
+                                Download Result
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Image to PDF Tool -->
+                    <div id="pdf-tool" class="tool-section">
+                        <h3 class="text-2xl font-bold mb-4">Image to PDF Converter</h3>
+                        <p class="text-gray-600 mb-6">
+                            Convert single or multiple images into a professional PDF document.
+                            Perfect for creating portfolios, reports, or documentation.
+                        </p>
+                        
+                        <div class="drag-area p-8 mb-6 text-center cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-blue-500 mb-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <h4 class="text-lg font-medium mb-2">Drag & Drop multiple images here</h4>
+                            <p class="text-gray-500 mb-4">or</p>
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition">
+                                Browse Files
+                            </button>
+                            <input type="file" class="hidden" accept="image/*" multiple>
+                            <p class="text-gray-500 text-sm mt-4">
+                                You can select multiple images (Max 20 files)
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">Selected Images</label>
+                            <div class="border border-gray-200 rounded-lg p-4 min-h-32">
+                                <div id="selected-files-container">
+                                    <div class="text-center text-gray-500">
+                                        No images selected yet
+                                    </div>
+                                </div>
+                                <div id="file-list" class="hidden">
+                                    <div class="file-item">
+                                        <div class="flex items-center">
+                                            <svg class="file-handle h-4 w-4 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                                            </svg>
+                                            <span>image-1.jpg</span>
+                                        </div>
+                                        <button class="text-red-500 hover:text-red-700">
+                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">
+                                Drag to rearrange the order of images in the PDF
+                            </p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block font-medium mb-2">PDF Options</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Page Size</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option value="a4">A4 (210 × 297 mm)</option>
+                                        <option value="letter">Letter (8.5 × 11 in)</option>
+                                        <option value="a3">A3 (297 × 420 mm)</option>
+                                        <option value="legal">Legal (8.5 × 14 in)</option>
+                                        <option value="original">Original Image Size</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Page Orientation</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option value="auto">Auto (Based on image)</option>
+                                        <option value="portrait">Portrait</option>
+                                        <option value="landscape">Landscape</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Quality</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option value="high">High (Larger file size)</option>
+                                        <option value="medium" selected>Medium (Recommended)</option>
+                                        <option value="low">Low (Smaller file size)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Page Margin</label>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg">
+                                        <option value="none">None</option>
+                                        <option value="small" selected>Small (10mm)</option>
+                                        <option value="medium">Medium (20mm)</option>
+                                        <option value="large">Large (30mm)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center">
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg mr-4 cursor-not-allowed">
+                                Create PDF
+                            </button>
+                            <button disabled class="bg-gray-300 text-gray-600 font-medium py-3 px-8 rounded-lg cursor-not-allowed">
+                                Download PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AdSense Container -->
+    <div class="adsense-container mx-auto container">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8917075150623976" crossorigin="anonymous"></script>
+    <!-- ImageMaster Pro Secondary Ad -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8917075150623976"
+         data-ad-slot="9560887139"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="py-16 bg-gray-100 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Thousands of users trust our tools for their image processing needs.
+                    Here's what they have to say.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg transition-colors duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-bold text-xl">J</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-bold">Jessica P.</h4>
+                            <p class="text-gray-600 text-sm">Web Designer</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        "This tool saved me so much time! I used to switch between multiple applications
+                        to process images for my clients' websites. Now I can do everything in one place."
+                    </p>
+                    <p class="text-sm text-gray-500">April 12, 2023</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg transition-colors duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-bold text-xl">M</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-bold">Michael R.</h4>
+                            <p class="text-gray-600 text-sm">E-commerce Manager</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        "The compression tool is a game-changer for our product images. We reduced our page 
+                        load times by 40% without losing any image quality. Highly recommend!"
+                    </p>
+                    <p class="text-sm text-gray-500">May 3, 2023</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-lg transition-colors duration-300">
+                    <div class="flex items-center mb-4">
+                        <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 font-bold text-xl">A</span>
+                        </div>
+                        <div class="ml-4">
+                            <h4 class="font-bold">Alex T.</h4>
+                            <p class="text-gray-600 text-sm">Freelance Photographer</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 mb-4">
+                        "The AI upscaler is incredible! I was able to rescue some old, low-resolution photos
+                        that I thought were unusable. The results look professional and natural."
+                    </p>
+                    <p class="text-sm text-gray-500">June 18, 2023</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact and Footer -->
+    <footer id="contact" class="bg-gray-800 text-white py-12 transition-colors duration-300">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <svg class="h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <span class="ml-3 text-xl font-bold text-blue-400">ImageMaster Pro</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Professional image processing tools accessible to everyone.
+                        Compress, convert, enhance, and create PDFs with ease.
+                    </p>
+                    <div class="flex space-x-4 mb-6">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#tools" class="text-gray-400 hover:text-white transition">Tools</a></li>
+                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition">Testimonials</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Contact Us</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-gray-400 mt-1 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span class="text-gray-400">support@imagemasterpro.com</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-gray-400 mt-1 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <span class="text-gray-400">+1 (555) 123-4567</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-gray-400 mt-1 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span class="text-gray-400">
+                                123 Tech Boulevard<br>
+                                San Francisco, CA 94107<br>
+                                United States
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 mt-8 border-t border-gray-700 text-center text-gray-400 text-sm">
+                <p>© 2023 ImageMaster Pro. All rights reserved.</p>
+                <p class="mt-2">
+                    <span class="inline-block px-2">Privacy Policy</span>
+                    <span class="inline-block px-2 border-l border-gray-600">Terms of Service</span>
+                    <span class="inline-block px-2 border-l border-gray-600">Sitemap</span>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Language Selector -->
+    <div class="fixed bottom-4 right-4 z-50">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <button id="language-toggle" class="px-4 py-2 text-gray-700 hover:bg-gray-100 transition flex items-center">
+                <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                English <span class="ml-2">▼</span>
+            </button>
+            <div id="language-menu" class="hidden">
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition">English</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Español</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Français</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition">Deutsch</a>
+                <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition">日本語</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Tool Section Tabs
+        const toolButtons = document.querySelectorAll('.tool-btn');
+        const toolSections = document.querySelectorAll('.tool-section');
+        
+        toolButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.getAttribute('data-target');
+                
+                // Hide all sections and remove active class from all buttons
+                toolSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                toolButtons.forEach(btn => {
+                    btn.classList.remove('active-tab');
+                });
+                
+                // Show target section and add active class to clicked button
+                document.getElementById(target).classList.add('active');
+                button.classList.add('active-tab');
+            });
+        });
+        
+        // Feature card links
+        const toolLinks = document.querySelectorAll('.tool-link');
+        
+        toolLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.getAttribute('href').replace('#', '');
+                
+                // Activate the relevant tool tab
+                document.querySelector(`[data-target="${target}"]`).click();
+                
+                // Scroll to the tools section
+                document.getElementById('tools').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+        
+        // Dark Mode Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const body = document.body;
+        const moonIcon = document.getElementById('moon-icon');
+        const sunIcon = document.getElementById('sun-icon');
+        
+        // Check for saved theme preference or use preferred-color-scheme
+        const savedTheme = localStorage.getItem('theme');
+        
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            enableDarkMode();
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('dark')) {
+                disableDarkMode();
+            } else {
+                enableDarkMode();
+            }
+        });
+        
+        function enableDarkMode() {
+            body.classList.add('dark');
+            moonIcon.classList.add('hidden');
+            sunIcon.classList.remove('hidden');
+            localStorage.setItem('theme', 'dark');
+        }
+        
+        function disableDarkMode() {
+            body.classList.remove('dark');
+            moonIcon.classList.remove('hidden');
+            sunIcon.classList.add('hidden');
+            localStorage.setItem('theme', 'light');
+        }
+        
+        // Language Selector Toggle
+        const languageToggle = document.getElementById('language-toggle');
+        const languageMenu = document.getElementById('language-menu');
+        
+        languageToggle.addEventListener('click', () => {
+            languageMenu.classList.toggle('hidden');
+        });
+        
+        // Drag and Drop Functionality
+        const dragAreas = document.querySelectorAll('.drag-area');
+        
+        dragAreas.forEach(dragArea => {
+            const input = dragArea.querySelector('input[type="file"]');
+            const browseButton = dragArea.querySelector('button');
+            
+            // Click browse button
+            browseButton.addEventListener('click', () => {
+                input.click();
+            });
+            
+            // File selected via browse
+            input.addEventListener('change', function() {
+                // Handle file selection (would implement actual file handling in a real app)
+                if (this.files.length > 0) {
+                    dragArea.querySelector('h4').textContent = 'File Selected: ' + this.files[0].name;
+                    
+                    // Enable relevant buttons
+                    const section = dragArea.closest('.tool-section');
+                    const buttons = section.querySelectorAll('button[disabled]');
+                    buttons.forEach(button => {
+                        button.disabled = false;
+                        button.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+                        button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                    });
+                    
+                    // Update UI for PDF tool with multiple files
+                    if (section.id === 'pdf-tool' && this.files.length > 1) {
+                        const filesContainer = document.getElementById('selected-files-container');
+                        const fileList = document.getElementById('file-list');
+                        
+                        filesContainer.innerHTML = '';
+                        
+                        for (let i = 0; i < this.files.length; i++) {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.innerHTML = `
+                                <div class="flex items-center">
+                                    <svg class="file-handle h-4 w-4 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                                    </svg>
+                                    <span>${this.files[i].name}</span>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            `;
+                            filesContainer.appendChild(fileItem);
+                        }
+                    }
+                }
+            });
+            
+            // Drag over event
+            dragArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dragArea.classList.add('active');
+            });
+            
+            // Drag leave event
+            dragArea.addEventListener('dragleave', () => {
+                dragArea.classList.remove('active');
+            });
+            
+            // Drop event
+            dragArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dragArea.classList.remove('active');
+                
+                // Handle dropped files
+                if (e.dataTransfer.files.length > 0) {
+                    dragArea.querySelector('h4').textContent = 'File Selected: ' + e.dataTransfer.files[0].name;
+                    input.files = e.dataTransfer.files;
+                    
+                    // Enable relevant buttons
+                    const section = dragArea.closest('.tool-section');
+                    const buttons = section.querySelectorAll('button[disabled]');
+                    buttons.forEach(button => {
+                        button.disabled = false;
+                        button.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+                        button.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                    });
+                    
+                    // Update UI for PDF tool with multiple files
+                    if (section.id === 'pdf-tool' && e.dataTransfer.files.length > 1) {
+                        const filesContainer = document.getElementById('selected-files-container');
+                        filesContainer.innerHTML = '';
+                        
+                        for (let i = 0; i < e.dataTransfer.files.length; i++) {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.innerHTML = `
+                                <div class="flex items-center">
+                                    <svg class="file-handle h-4 w-4 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                                    </svg>
+                                    <span>${e.dataTransfer.files[i].name}</span>
+                                </div>
+                                <button class="text-red-500 hover:text-red-700">
+                                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            `;
+                            filesContainer.appendChild(fileItem);
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Document click handler to close language menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!languageToggle.contains(e.target) && !languageMenu.contains(e.target)) {
+                languageMenu.classList.add('hidden');
+            }
+        });
+        
+        // Format info tooltip handling for mobile
+        const formatTooltips = document.querySelectorAll('.format-info-tooltip');
+        formatTooltips.forEach(tooltip => {
+            tooltip.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const tooltipText = tooltip.querySelector('.tooltip-text');
+                tooltipText.style.visibility = tooltipText.style.visibility === 'visible' ? 'hidden' : 'visible';
+                tooltipText.style.opacity = tooltipText.style.opacity === '1' ? '0' : '1';
+            });
+        });
+        
+        // Simulate image processing to demonstrate UI functionality
+        const simulateProcessing = (toolId) => {
+            const section = document.getElementById(toolId);
+            const actionButtons = section.querySelectorAll('button:not([disabled])');
+            
+            actionButtons.forEach(button => {
+                if (button.textContent.trim() === 'Compress Image' || 
+                    button.textContent.trim() === 'Convert Image' ||
+                    button.textContent.trim() === 'Enhance Image' ||
+                    button.textContent.trim() === 'Create PDF') {
+                    
+                    button.addEventListener('click', () => {
+                        // Update button to show processing
+                        const originalText = button.textContent;
+                        button.textContent = 'Processing...';
+                        button.disabled = true;
+                        
+                        // Simulate processing delay
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.disabled = false;
+                            
+                            // Update relevant UI elements based on tool
+                            if (toolId === 'compress-tool') {
+                                document.getElementById('original-size').textContent = '2.4 MB';
+                                document.getElementById('compressed-size').textContent = '645 KB';
+                                document.getElementById('saved-percentage').textContent = '73%';
+                            } else if (toolId === 'convert-tool') {
+                                document.getElementById('original-format').textContent = 'JPG';
+                                document.getElementById('format-original-size').textContent = '2.4 MB';
+                            } else if (toolId === 'upscale-tool') {
+                                document.getElementById('original-resolution').textContent = '800 × 600';
+                                document.getElementById('enhanced-resolution').textContent = '1600 × 1200';
+                            }
+                            
+                            // Enable download button
+                            const downloadButton = section.querySelector('button:last-child');
+                            downloadButton.disabled = false;
+                            downloadButton.classList.remove('bg-gray-300', 'text-gray-600', 'cursor-not-allowed');
+                            downloadButton.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                        }, 2000);
+                    });
+                }
+            });
+        };
+        
+        // Initialize simulated processing for each tool
+        simulateProcessing('compress-tool');
+        simulateProcessing('convert-tool');
+        simulateProcessing('upscale-tool');
+        simulateProcessing('pdf-tool');
+    </script>
+</body>
+</html>
